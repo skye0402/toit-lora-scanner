@@ -1,0 +1,7 @@
+# Specification for the Display Application
+
+name: Scan barcode from UART2 and send to LoRa
+entrypoint: scan-container.toit
+triggers:
+  on_boot: true
+  on_install: true

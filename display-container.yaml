@@ -1,0 +1,13 @@
+# Specification for the Display Application
+
+name: Display information on ESP32's display
+entrypoint: display-container.toit
+triggers:
+  on_boot: true
+  on_install: true
+  on_pubsub_topic:
+    - "device:showOnDispl"
+
+pubsub:
+  subscriptions:
+    - "device:showOnDispl"

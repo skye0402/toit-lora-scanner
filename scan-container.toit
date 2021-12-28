@@ -7,7 +7,6 @@ loopDone := false
 
 // PubSub Topics
 topicBarcodeRead ::= "device:readBarcode" // Barcode read from scanner
-topicDataReceive ::= "device:dataFromSAP" // Received EAN data from SAP System
 topicDisplayShow ::= "device:showOnDispl" // Information to be shown on I2C Display
 
 sendToSerial serialPort/uart.Port barcodeData/string:
@@ -25,9 +24,14 @@ readFromSerialOne serialPort/uart.Port:
             sData := serialPort.read
             if not sData:
                 break
-            print "->$sData.to_string"
+            sapData := sData.to_string
+            print "->$sapData"
+            if sapData.size > 10:
+                print "Calling display."
+                // Split string and notify display container
+                pubsub.publish topicDisplayShow "#$sapData"
 
-readFromSerialTwo serialPort/uart.Port: //loraPort/uart.Port:
+readFromSerialTwo serialPort/uart.Port loraPort/uart.Port:
     print "Serial data 2 listener started."
 
     task::
@@ -42,7 +46,7 @@ readFromSerialTwo serialPort/uart.Port: //loraPort/uart.Port:
             if sData.to_string.size == 14:
                 print "Valid EAN - Inform Display and LoRa Container"
                 pubsub.publish topicDisplayShow "Requesting EAN/$sData.to_string[..13]" //remove 0x0D, comes with scanner
-                //sendToSerial loraPort sData.to_string[..13]
+                sendToSerial loraPort sData.to_string[..13]
 
 main:
     print "Initialize serial port 1 (LoRa-Module)"
@@ -59,7 +63,7 @@ main:
 
     // Start listener
     task:: readFromSerialOne serialOne
-    task:: readFromSerialTwo serialTwo //serialOne
+    task:: readFromSerialTwo serialTwo serialOne
 
     // currently endless
     while loopDone==false:

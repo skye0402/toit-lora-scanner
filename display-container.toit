@@ -13,7 +13,6 @@ loopDone := false
 
 // PubSub Topics
 topicBarcodeRead ::= "device:readBarcode" // Barcode read from scanner
-topicDataReceive ::= "device:dataFromSAP" // Received EAN data from SAP System
 topicDisplayShow ::= "device:showOnDispl" // Information to be shown on I2C Display
 
 
@@ -40,13 +39,20 @@ main:
     display.draw
 
     pubsub.subscribe topicDisplayShow: | msg/pubsub.Message |
-        print "Received message '$msg.payload.to_string'"
-        display.remove_all
+        dispMsg := msg.payload.to_string
+        print "Received message '$dispMsg'"
         i := 1
         lineHeight := 12
+        if dispMsg[0] == 35: //#
+            i = 3
+        else:
+            display.remove_all
+        
         msg.payload.to_string.split "/":
             print it
             y := i * lineHeight + i
             display.text context 1 y "$it"
             i++
         display.draw
+        sleep
+            --ms=50

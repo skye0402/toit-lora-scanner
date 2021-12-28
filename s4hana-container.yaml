@@ -1,0 +1,7 @@
+# Specification for the SAP S/4HANA Application
+
+name: Submit GTIN-13 to S/4HANA and receive product/material data
+entrypoint: s4hana-container.toit
+triggers:
+  on_boot: true
+  on_install: true
